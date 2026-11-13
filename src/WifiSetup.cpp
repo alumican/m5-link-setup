@@ -17,9 +17,9 @@ namespace m5linksetup {
 
 // ---- QR text ----------------------------------------------------------------
 
-bool parseWifiQr(const String& text, WifiCredentials& out) {
+bool parseWifiQr(const String& text, WifiLink::Network& out) {
   if (!text.startsWith("WIFI:")) return false;
-  WifiCredentials c;
+  WifiLink::Network c;
   String key, val;
   bool inVal = false;
   for (size_t i = 5; i < text.length(); i++) {
@@ -30,7 +30,7 @@ bool parseWifiQr(const String& text, WifiCredentials& out) {
       inVal = true;
     } else if (ch == ';') {
       if (key == "S") c.ssid = val;
-      if (key == "P") c.pass = val;
+      if (key == "P") c.password = val;
       key = val = "";
       inVal = false;
     } else {
@@ -89,7 +89,7 @@ const WifiOptions* opt = nullptr;
 String apPass;
 String options;  // <option>s of the visible networks
 bool gotFromWeb = false;
-WifiCredentials webCreds;
+WifiLink::Network webCreds;
 
 String htmlEscape(const String& s) {
   String out;
@@ -193,7 +193,7 @@ void handleRoot() {
 
 void handleSave() {
   webCreds.ssid = web.arg("other").length() ? web.arg("other") : web.arg("ssid");
-  webCreds.pass = web.arg("pass");
+  webCreds.password = web.arg("pass");
   gotFromWeb = webCreds.ssid.length() > 0;
   web.send(200, "text/html",
            pageHead() + "<h1>Saved</h1><p>" + htmlEscape(opt->deviceName) + " is connecting to <b>" +
@@ -339,7 +339,7 @@ bool decodeQr(quirc* q, const camera_fb_t* fb, String& text) {
 
 }  // namespace
 
-bool setupWifi(WifiCredentials& out, const WifiOptions& options) {
+bool setupWifi(WifiLink::Network& out, const WifiOptions& options) {
   opt = &options;
   m5ui::events::add("setup: start");
   drawLoading();  // first, so the slow parts (scan, camera) happen behind "Now loading..."
@@ -413,6 +413,7 @@ bool setupWifi(WifiCredentials& out, const WifiOptions& options) {
     delay(1);
   }
 
+  if (ok && opt->store && !opt->store->save(out.ssid, out.password)) m5ui::events::add("setup: save failed");
   if (ok) {
     drawStatus("Got " + out.ssid + ". Connecting...", m5ui::theme.ok);
     uint32_t at = millis();

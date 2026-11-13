@@ -5,18 +5,13 @@ In order.
 ## 1. Check on a device
 
 - [ ] Run `examples/wifi` on a CoreS3: phone share QR, setup page, Cancel, timeout, no camera.
-- [ ] Verify that `lib_deps = https://github.com/alumican/m5-link-setup.git#v0.1.0` builds in PlatformIO.
+- [x] Verify that `lib_deps = https://github.com/alumican/m5-link-setup.git#v0.1.0` builds in PlatformIO.
 
-## 2. Follow m5-link
-
-- [ ] Depend on m5-link once it is installable by git URL, and use its credential type.
-- [ ] Hand the credentials to m5-link's save API instead of returning them only, if it gets one.
-
-## 3. Tokens
+## 2. Tokens
 
 - [ ] Move the screen's sizes and the label color into tokens when m5-ui has them.
 
-## 4. BLE pairing
+## 3. BLE pairing
 
 Once m5-link has BLE (HID keyboard, serial):
 

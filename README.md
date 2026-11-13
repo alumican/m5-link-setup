@@ -5,28 +5,32 @@ Screens for joining networks by hand on M5Stack CoreS3. Tested with M5Unified 0.
 - **setupWifi()**: Wi-Fi setup. Show a phone's Wi-Fi share QR to the camera, or scan the QR on screen to open a setup page on the phone.
 - **parseWifiQr()**: reads the `WIFI:` text of a Wi-Fi share QR.
 
-Connecting, saving and trying networks in order belong to the app, or to m5-link once it has them. This library only gets the credentials from the user.
+Connecting, saving and trying networks in order belong to m5-link (`WifiLink`). This library only gets the network from the user.
 
 ## Install
 
 ```ini
 lib_deps =
-  https://github.com/alumican/m5-link-setup.git#v0.1.0
+  https://github.com/alumican/m5-link-setup.git#v0.2.0
 ```
 
-It pulls in m5-ui (screen colors and the event log) and ESP32QRCodeReader (for its quirc QR decoder).
+It pulls in m5-link (`WifiLink`), m5-ui (screen colors and the event log) and ESP32QRCodeReader (for its quirc QR decoder).
 
 ## Wi-Fi
 
 ```cpp
+#include "WifiLink.h"
 #include "m5linksetup.h"
+
+WifiLink wifi("mydevice-wifi");
 
 m5linksetup::WifiOptions o;
 o.apSsid = "mydevice-setup";  // the setup network the phone joins
 o.deviceName = "My device";   // used on the phone page
-m5linksetup::WifiCredentials c;
-if (m5linksetup::setupWifi(c, o)) {
-  WiFi.begin(c.ssid.c_str(), c.pass.c_str());  // and save it if you like
+o.store = &wifi;              // saves the result; leave nullptr to only return it
+WifiLink::Network n;
+if (m5linksetup::setupWifi(n, o)) {
+  wifi.connect(n);
 }
 // redraw your screen
 ```
@@ -41,13 +45,13 @@ Notes:
 - `setupWifi()` blocks until it gets credentials, Cancel is tapped, `options.cancel()` returns true or `options.timeoutMs` passes (3 min).
 - While it runs, Wi-Fi is in AP mode only. Reconnecting as a station moves the AP's channel and phones fail to join.
 - It starts and stops the camera itself, on the internal I2C that M5Unified already drives. Stop your own camera use first, or set `options.useCamera = false`.
-- Afterwards Wi-Fi is in STA mode with auto-reconnect on, and nothing is connected or saved.
+- Afterwards Wi-Fi is in STA mode with auto-reconnect on. Nothing is connected, and nothing is saved unless `options.store` is set.
 - Texts, the page's accent color and timings are in `WifiOptions`. Screen colors come from `m5ui::theme`.
 - Events such as `setup: phone joined` go to `m5ui::events`.
 
 ## Example
 
-`examples/wifi`: tap to open the setup screen, then connect.
+`examples/wifi`: joins the saved network at start; tap to open the setup screen, which saves the result, then connect.
 
 ```sh
 cd examples/wifi

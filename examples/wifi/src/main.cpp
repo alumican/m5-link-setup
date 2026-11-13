@@ -1,11 +1,14 @@
-// Tap the screen to open Wi-Fi setup, then connect to the network it returns.
+// Joins the saved Wi-Fi at start. Tap the screen to open Wi-Fi setup, which saves the result, then connect.
 // Typing c on Serial cancels the setup screen.
 
 #include <M5Unified.h>
 #include <WiFi.h>
 
+#include "WifiLink.h"
 #include "m5linksetup.h"
 #include "m5ui.h"
+
+static WifiLink wifi("example-wifi");
 
 static void drawHome() {
   M5.Display.fillScreen(m5ui::theme.bg);
@@ -21,6 +24,7 @@ void setup() {
   M5.begin();
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
+  wifi.connect();
   drawHome();
 }
 
@@ -31,12 +35,9 @@ void loop() {
     o.apSsid = "m5-link-setup";
     o.deviceName = "Stack-chan";
     o.cancel = [] { return Serial.available() && Serial.read() == 'c'; };
-    m5linksetup::WifiCredentials c;
-    if (m5linksetup::setupWifi(c, o)) {
-      WiFi.begin(c.ssid.c_str(), c.pass.c_str());
-      for (int i = 0; i < 100 && !WiFi.isConnected(); i++) delay(100);
-      m5ui::events::add("wifi: %s", WiFi.isConnected() ? "connected" : "failed");
-    }
+    o.store = &wifi;
+    WifiLink::Network n;
+    if (m5linksetup::setupWifi(n, o)) m5ui::events::add("wifi: %s", wifi.connect(n) ? "connected" : "failed");
     drawHome();
   }
   delay(10);

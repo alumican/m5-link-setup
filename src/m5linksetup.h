@@ -3,12 +3,9 @@
 
 #include <Arduino.h>
 
-namespace m5linksetup {
+#include "WifiLink.h"
 
-struct WifiCredentials {
-  String ssid;
-  String pass;
-};
+namespace m5linksetup {
 
 // Texts, colors and timings for setupWifi(). The screen itself uses m5ui::theme.
 struct WifiOptions {
@@ -23,16 +20,18 @@ struct WifiOptions {
   uint32_t gotHoldMs = 1500;              // keeps "Got <ssid>" on screen before returning
   bool useCamera = true;
   bool (*cancel)() = nullptr;             // polled; return true to stop, e.g. from Serial
+  WifiLink* store = nullptr;              // if set, the result is saved there with WifiLink::save()
 };
 
 // Parses "WIFI:T:WPA;S:<ssid>;P:<pass>;;", the format phones use to share Wi-Fi.
-bool parseWifiQr(const String& text, WifiCredentials& out);
+bool parseWifiQr(const String& text, WifiLink::Network& out);
 
 // Blocks while showing the Wi-Fi setup screen. The user either shows a phone's Wi-Fi share QR to the camera,
 // or scans the QR on screen to join the setup network and picks a network on the page that opens.
-// Returns true with the credentials; false if cancelled or timed out. Does not connect or save; the app does.
+// Returns true with the network; false if cancelled or timed out. Saves it to options.store if set, and does
+// not connect; the app does, e.g. with WifiLink::connect().
 // Starts and stops the camera itself, so the camera must not be in use. Leaves Wi-Fi in STA mode with
 // auto-reconnect on. Redraw your screen afterwards.
-bool setupWifi(WifiCredentials& out, const WifiOptions& options = WifiOptions());
+bool setupWifi(WifiLink::Network& out, const WifiOptions& options = WifiOptions());
 
 }  // namespace m5linksetup
