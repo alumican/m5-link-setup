@@ -19,6 +19,7 @@ struct WifiOptions {
   uint32_t scanTimeoutMs = 10000;
   uint32_t gotHoldMs = 1500;              // keeps "Got <ssid>" on screen before returning
   bool useCamera = true;
+  bool mirrorPreview = false;             // flips the camera preview left to right; reading tries both
   bool (*cancel)() = nullptr;             // polled; return true to stop, e.g. from Serial
   WifiLink* store = nullptr;              // if set, the result is saved there with WifiLink::save()
 };

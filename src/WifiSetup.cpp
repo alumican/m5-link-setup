@@ -261,6 +261,7 @@ const int QR_X = 186, QR_Y = 56, QR_W = 116, QR_BORDER = 5;
 const int PREVIEW_X = 8, PREVIEW_Y = QR_Y - 4, PREVIEW_W = 160, PREVIEW_H = 120;
 const int CANCEL_X = 8, CANCEL_Y = 200, CANCEL_W = 304, CANCEL_H = 34, CANCEL_R = 6, CANCEL_SLOP = 8;
 const uint16_t LABEL = 0xBDF7;
+const uint32_t QR_LOG_MS = 2000;  // at most one "not read" log per this
 
 void drawLoading() {
   auto& d = M5.Display;
@@ -301,11 +302,11 @@ void drawStatus(const String& text, uint16_t color) {
   d.drawString(text, 160, STATUS_Y);
 }
 
-// Half size and mirrored, which makes it easier to hold a phone up to.
+// Half size; mirrored if options.mirrorPreview.
 void drawPreview(const camera_fb_t* fb, uint8_t* buf) {
   for (int y = 0; y < PREVIEW_H; y++) {
     const uint8_t* row = fb->buf + (y * 2) * fb->width;
-    for (int x = 0; x < PREVIEW_W; x++) buf[y * PREVIEW_W + (PREVIEW_W - 1 - x)] = row[x * 2];
+    for (int x = 0; x < PREVIEW_W; x++) buf[y * PREVIEW_W + (opt->mirrorPreview ? PREVIEW_W - 1 - x : x)] = row[x * 2];
   }
   M5.Display.pushGrayscaleImage(PREVIEW_X, PREVIEW_Y, PREVIEW_W, PREVIEW_H, buf, lgfx::grayscale_8bit, TFT_WHITE,
                                 TFT_BLACK);
@@ -318,21 +319,52 @@ bool cancelled() {
          (opt->cancel && opt->cancel());
 }
 
-// Returns the text of the first QR decoded.
+// Decodes the QRs quirc found in the image it holds. Returns the first error if none decodes.
+quirc_decode_error_t decodeFound(quirc* q, String& text) {
+  static quirc_code code;  // about 13 KB together; overflows the 8 KB loop() stack
+  static quirc_data data;
+  quirc_decode_error_t first = QUIRC_SUCCESS;
+  for (int i = 0; i < quirc_count(q); i++) {
+    quirc_extract(q, i, &code);
+    quirc_decode_error_t err = quirc_decode(&code, &data);
+    if (err == QUIRC_SUCCESS) {
+      text = String((const char*)data.payload);
+      return QUIRC_SUCCESS;
+    }
+    if (first == QUIRC_SUCCESS) first = err;
+  }
+  return first;
+}
+
+// Returns the text of the first QR decoded. A QR seen but not decoded is tried again mirrored, as some
+// cameras deliver mirrored frames and this quirc has no quirc_flip().
 bool decodeQr(quirc* q, const camera_fb_t* fb, String& text) {
+  static uint32_t loggedAt = 0;
   int w, h;
   uint8_t* image = quirc_begin(q, &w, &h);
   if (w != (int)fb->width || h != (int)fb->height) return false;
   memcpy(image, fb->buf, w * h);
   quirc_end(q);
-  for (int i = 0; i < quirc_count(q); i++) {
-    static quirc_code code;  // about 13 KB together; overflows the 8 KB loop() stack
-    static quirc_data data;
-    quirc_extract(q, i, &code);
-    if (quirc_decode(&code, &data) == QUIRC_SUCCESS) {
-      text = String((const char*)data.payload);
-      return true;
-    }
+  if (quirc_count(q) == 0) return false;
+  quirc_decode_error_t err = decodeFound(q, text);
+  if (err == QUIRC_SUCCESS) return true;
+
+  image = quirc_begin(q, &w, &h);
+  for (int y = 0; y < h; y++) {
+    const uint8_t* src = fb->buf + y * w;
+    uint8_t* dst = image + y * w;
+    for (int x = 0; x < w; x++) dst[w - 1 - x] = src[x];
+  }
+  quirc_end(q);
+  quirc_decode_error_t errMirrored = decodeFound(q, text);
+  if (errMirrored == QUIRC_SUCCESS) {
+    m5ui::events::add("setup: qr read mirrored");
+    return true;
+  }
+  if (millis() - loggedAt > QR_LOG_MS) {
+    loggedAt = millis();
+    m5ui::events::add("setup: qr seen, not read (%s / mirrored %s)", quirc_strerror(err),
+                      quirc_strerror(errMirrored));
   }
   return false;
 }

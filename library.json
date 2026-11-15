@@ -1,6 +1,6 @@
 {
   "name": "m5-link-setup",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Screens for joining networks by hand on M5Stack CoreS3: Wi-Fi from a phone's share QR or a setup page.",
   "authors": [
     {

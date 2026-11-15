@@ -11,7 +11,7 @@ Connecting, saving and trying networks in order belong to m5-link (`WifiLink`). 
 
 ```ini
 lib_deps =
-  https://github.com/alumican/m5-link-setup.git#v0.2.0
+  https://github.com/alumican/m5-link-setup.git#v0.3.0
 ```
 
 It pulls in m5-link (`WifiLink`), m5-ui (screen colors and the event log) and ESP32QRCodeReader (for its quirc QR decoder).
@@ -44,6 +44,7 @@ Notes:
 
 - `setupWifi()` blocks until it gets credentials, Cancel is tapped, `options.cancel()` returns true or `options.timeoutMs` passes (3 min).
 - While it runs, Wi-Fi is in AP mode only. Reconnecting as a station moves the AP's channel and phones fail to join.
+- The CoreS3 camera delivers mirrored frames. A QR seen but not read is tried again mirrored, so either way reads. The preview shows frames as delivered, which looks like a mirror; set `options.mirrorPreview` to flip it.
 - It starts and stops the camera itself, on the internal I2C that M5Unified already drives. Stop your own camera use first, or set `options.useCamera = false`.
 - Afterwards Wi-Fi is in STA mode with auto-reconnect on. Nothing is connected, and nothing is saved unless `options.store` is set.
 - Texts, the page's accent color and timings are in `WifiOptions`. Screen colors come from `m5ui::theme`.
