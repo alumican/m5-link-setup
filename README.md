@@ -13,10 +13,10 @@ Connecting, saving and trying networks in order belong to m5-link (`WifiLink`). 
 lib_deps =
   https://github.com/alumican/m5-ui.git#v0.4.0
   https://github.com/alumican/m5-link.git#v0.4.0
-  https://github.com/alumican/m5-link-setup.git#v0.4.0
+  https://github.com/alumican/m5-link-setup.git#v0.4.1
 ```
 
-It uses m5-link (`WifiLink`) and m5-ui (screen colors and the event log), which the app lists itself so that only one copy of each is built; the versions above are the ones it was built with. It pulls in ESP32QRCodeReader (for its quirc QR decoder).
+It uses m5-link (`WifiLink`) and m5-ui (screen colors and the event log), which the app lists itself (before m5-link-setup) so that only one copy of each is built; library.json names them without a version. The versions above are the ones it was built with. It pulls in ESP32QRCodeReader (for its quirc QR decoder).
 
 ## Wi-Fi
 

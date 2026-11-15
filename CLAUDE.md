@@ -5,7 +5,7 @@ Screens for joining networks by hand on M5Stack: Wi-Fi now, BLE pairing next. Us
 ## Rules
 
 - Only what a person does to join a network: reading a QR, the setup page, pairing screens, and their texts. Transports, saving and trying networks in order belong to m5-link.
-- Depends on m5-link and m5-ui, never the other way round. library.json does not pin them: apps list them in lib_deps, so a version bump in either never builds two copies. Owns the camera only while a setup screen is open.
+- Depends on m5-link and m5-ui, never the other way round. library.json names them without a version (needed for include paths); apps pin them in lib_deps, so a version bump in either never builds two copies. Owns the camera only while a setup screen is open.
 - No app-specific text, names or behavior. Texts, colors and timings come from options or `m5ui::theme`.
 - Release with git tags (`v0.1.0`, ...). Apps pin a tag in `lib_deps` and switch to `symlink://` only while changing both. Breaking changes bump the major or minor version and are announced to users.
 - English only, everywhere in this repository: code, comments, docs, commit messages, tags, issues and pull requests. Keep it concise and ASCII only.
