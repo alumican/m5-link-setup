@@ -1,6 +1,6 @@
 {
   "name": "m5-link-setup",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Screens for joining networks by hand on M5Stack CoreS3: Wi-Fi from a phone's share QR or a setup page.",
   "authors": [
     {
@@ -13,7 +13,7 @@
     "m5stack/M5Unified": ">=0.2.29",
     "alvarowolfx/ESP32QRCodeReader": "1.1.0",
     "m5-ui": "https://github.com/alumican/m5-ui.git#v0.2.0",
-    "m5-link": "https://github.com/alumican/m5-link.git#v0.2.0"
+    "m5-link": "https://github.com/alumican/m5-link.git#v0.3.1"
   },
   "export": {
     "exclude": ["examples/*/.pio"]
