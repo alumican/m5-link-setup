@@ -11,7 +11,7 @@ Connecting, saving and trying networks in order belong to m5-link (`WifiLink`). 
 
 ```ini
 lib_deps =
-  https://github.com/alumican/m5-link-setup.git#v0.3.1
+  https://github.com/alumican/m5-link-setup.git#v0.3.2
 ```
 
 It pulls in m5-link (`WifiLink`), m5-ui (screen colors and the event log) and ESP32QRCodeReader (for its quirc QR decoder).
