@@ -22,6 +22,12 @@ bool parseWifiQr(const String& text, WifiLink::Network& out) {
   WifiLink::Network c;
   String key, val;
   bool inVal = false;
+  auto endField = [&]() {
+    if (key == "S") c.ssid = val;
+    if (key == "P") c.password = val;
+    key = val = "";
+    inVal = false;
+  };
   for (size_t i = 5; i < text.length(); i++) {
     char ch = text[i];
     if (ch == '\\' && i + 1 < text.length()) {  // \; \: \, \\ \" stand for the character itself
@@ -29,14 +35,12 @@ bool parseWifiQr(const String& text, WifiLink::Network& out) {
     } else if (!inVal && ch == ':') {
       inVal = true;
     } else if (ch == ';') {
-      if (key == "S") c.ssid = val;
-      if (key == "P") c.password = val;
-      key = val = "";
-      inVal = false;
+      endField();
     } else {
       (inVal ? val : key) += ch;
     }
   }
+  endField();  // some generators leave out the closing ";"
   if (c.ssid.isEmpty()) return false;
   out = c;
   return true;

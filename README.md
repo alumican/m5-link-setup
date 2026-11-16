@@ -13,7 +13,7 @@ Connecting, saving and trying networks in order belong to m5-link (`WifiLink`). 
 lib_deps =
   https://github.com/alumican/m5-ui.git#v0.4.0
   https://github.com/alumican/m5-link.git#v0.4.0
-  https://github.com/alumican/m5-link-setup.git#v0.4.1
+  https://github.com/alumican/m5-link-setup.git#v0.4.2
 ```
 
 It uses m5-link (`WifiLink`) and m5-ui (screen colors and the event log), which the app lists itself (before m5-link-setup) so that only one copy of each is built; library.json names them without a version. The versions above are the ones it was built with. It pulls in ESP32QRCodeReader (for its quirc QR decoder).
@@ -59,6 +59,16 @@ Notes:
 ```sh
 cd examples/wifi
 pio run -t upload
+```
+
+## Tests
+
+`tests`: Unity tests that run on a connected CoreS3. They cover `parseWifiQr()`; the screens are checked by hand with the example.
+
+```sh
+cd tests
+pio test                                        # build, upload and run
+pio test --without-uploading --without-testing  # build only
 ```
 
 ## License
