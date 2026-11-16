@@ -7,7 +7,7 @@ In order.
 - [x] Setup page on a CoreS3: scan the screen QR, pick a network, save to WifiLink, connect.
 - [x] Phone share QR (iPhone Passwords app) on a CoreS3: read after retrying mirrored.
 - [ ] Cancel, timeout, no camera.
-- [ ] Run `tests` (`pio test`) on a CoreS3. Builds; not run yet.
+- [x] Run `tests` (`pio test`) on a CoreS3: 10 of 10 pass (v0.4.2).
 - [x] Verify that `lib_deps = https://github.com/alumican/m5-link-setup.git#v0.1.0` builds in PlatformIO.
 
 ## 2. Tokens
